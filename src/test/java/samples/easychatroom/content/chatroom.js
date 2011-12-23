@@ -30,7 +30,8 @@ function connect() {
 
     // connect to socket
     logText('* Connecting...');
-    chatServer = new WebbitSocket('/chatsocket', {
+    var ws = new WebSocket('ws://' + document.location.host + '/chatsocket');
+    chatServer = new WebbitSocket(ws, {
         onopen: function() {
             logText('* Connected!');
             login();

@@ -1,12 +1,12 @@
 # Webbit EasyRemote
 
 Webbit EasyRemote is a thin bidirectional RPC layer on top of Webbit's WebSockets.
-It allows you to invoke Javascript functions in the browwser from server-side Java objects
-and java methods on the server from Javascript functions.
+It allows you to invoke JavaScript functions in the browwser from server-side Java objects
+and java methods on the server from JavaScript functions.
 
 ## On the server
 
-Start by creating a Java interface that represents the Javascript functions you want to invoke from the server:
+Start by creating a Java interface that represents the JavaScript functions you want to invoke from the server:
 
     @Remote
     interface ChatClient {
@@ -115,4 +115,4 @@ If a method/function is invoked with a different number of arguments than the ot
 
 If a function on the client called by the server raises an exception, that exception will be caught in the Javascript library and
 sent down to the server. You will get a better error message on the server if the client has loaded the [stacktrace.js](http://stacktracejs.org/) script.
-You can try this out with the chat example and typing the message "fbomb".
+You can try this out with the chat example and typing the message "throw string" or "throw exception".

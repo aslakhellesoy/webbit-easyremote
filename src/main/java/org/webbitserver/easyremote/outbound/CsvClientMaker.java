@@ -10,7 +10,7 @@ import org.webbitserver.easyremote.NotCsvSerializableException;
  * null becomes an empty string, which is falseley in javascript.
  *
  * You're trading flexibility for speed with this class.
- * If you need to send more complex data, use {@link GsonClientMaker} instead.
+ * If you need to send more complex data, use {@link JsonClientMaker} instead.
  */
 public class CsvClientMaker extends DynamicProxyClientMaker {
     private static final String NULL = "";

@@ -7,9 +7,16 @@ import org.webbitserver.easyremote.ClientException;
 import org.webbitserver.easyremote.NoSuchRemoteMethodException;
 import org.webbitserver.easyremote.Remote;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
 
@@ -43,11 +50,58 @@ public abstract class InboundDispatcher {
     }
 
     @Remote
-    public void __reportClientException(String message) {
-        throw new ClientException(message);
+    public void __reportClientException(String message, List<String> trace) {
+        ClientException clientException = new ClientException(message);
+        StackTraceElement[] traces = new StackTraceElement[trace.size()];
+        for (int i = 0; i < trace.size(); i++) {
+            traces[i] = newStackTraceElement(trace.get(i));
+        }
+        clientException.setStackTrace(traces);
+        throw clientException;
     }
 
-    protected abstract InboundMessage unmarshalInboundRequest(String msg);
+    private static final Pattern JS_PATTERN = Pattern.compile("([^\\s]+)\\s*\\((.*)\\)$");
+    private static final Pattern FILE_LINE_PATTERN = Pattern.compile("(.*):(\\d+)$");
+
+    public static StackTraceElement newStackTraceElement(String jsLine) {
+        String classMethod = "JavaScript.UNKNOWN_FUNCTION";
+        String fileLine = "UNKNOWN_FILE:-1";
+
+        Matcher matcher = JS_PATTERN.matcher(jsLine);
+        if (matcher.matches()) {
+            classMethod = matcher.group(1);
+            fileLine = matcher.group(2);
+        }
+
+        String className;
+        String methodName;
+        {
+            String[] classMethodSegments = classMethod.split("\\.");
+            if (classMethodSegments.length == 2) {
+                className = classMethodSegments[0];
+                methodName = classMethodSegments[1];
+            } else {
+                className = "";
+                methodName = classMethod;
+            }
+        }
+
+        String fileName;
+        int lineNumber;
+        {
+            Matcher fileLineMatcher = FILE_LINE_PATTERN.matcher(fileLine);
+            if (fileLineMatcher.matches()) {
+                fileName = fileLineMatcher.group(1);
+                lineNumber = Integer.parseInt(fileLineMatcher.group(2));
+            } else {
+                fileName = fileLine;
+                lineNumber = -1;
+            }
+        }
+        return new StackTraceElement(className, methodName, fileName, lineNumber);
+    }
+
+    protected abstract InboundMessage unmarshalInboundRequest(String msg) throws IOException;
 
     public interface InboundMessage {
         String method();
@@ -100,7 +154,7 @@ public abstract class InboundDispatcher {
                 } else {
                     try {
                         callArgs[i] = argList.remove(0);
-                    } catch(IndexOutOfBoundsException e) {
+                    } catch (IndexOutOfBoundsException e) {
                         throw new BadNumberOfArgumentsException(method.toString(), method.getParameterTypes().length, asList(args));
                     }
                 }

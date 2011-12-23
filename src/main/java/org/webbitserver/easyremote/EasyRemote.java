@@ -2,38 +2,41 @@ package org.webbitserver.easyremote;
 
 import org.webbitserver.WebSocketConnection;
 import org.webbitserver.WebSocketHandler;
-import org.webbitserver.easyremote.inbound.GsonInboundDispatcher;
+import org.webbitserver.easyremote.inbound.JsonInboundDispatcher;
 import org.webbitserver.easyremote.inbound.InboundDispatcher;
 import org.webbitserver.easyremote.outbound.ClientMaker;
-import org.webbitserver.easyremote.outbound.CsvClientMaker;
 import org.webbitserver.easyremote.outbound.Exporter;
-import org.webbitserver.easyremote.outbound.GsonClientMaker;
+import org.webbitserver.easyremote.outbound.JsonClientMaker;
 
 @SuppressWarnings({"unchecked"})
-public class MagicWS<CLIENT> implements WebSocketHandler {
+public class EasyRemote<CLIENT> implements WebSocketHandler {
 
-    public static final String CLIENT_KEY = MagicWS.class.getPackage().getName() + ".client";
+    public static final String CLIENT_KEY = EasyRemote.class.getPackage().getName() + ".client";
 
     private final Class<CLIENT> clientType;
+    private final ClientMaker clientMaker;
     private final Server<CLIENT> server;
     private final InboundDispatcher in;
 
-    public MagicWS(Class<CLIENT> clientType, Server<CLIENT> server) {
+    public EasyRemote(Class<CLIENT> clientType, Server<CLIENT> server, ClientMaker clientMaker) {
         this.clientType = clientType;
-        this.in = new GsonInboundDispatcher(server, clientType);
+        this.clientMaker = clientMaker;
+        this.in = new JsonInboundDispatcher(server, clientType);
         this.server = server;
     }
 
-    public static <T> WebSocketHandler magic(Class<T> clientType, Server<T> server) {
-        return new MagicWS<T>(clientType, server);
+    public EasyRemote(Class<CLIENT> clientType, Server<CLIENT> server) {
+        this(clientType, server, new JsonClientMaker());
+    }
+
+    public static <T> WebSocketHandler easyRemote(Class<T> clientType, Server<T> server) {
+        return new EasyRemote<T>(clientType, server);
     }
 
     @Override
     public void onOpen(WebSocketConnection connection) throws Exception {
-        String serverClientFormat = connection.httpRequest().queryParam("serverClientFormat");
-        ClientMaker clientMaker = "csv".equals(serverClientFormat) ? new CsvClientMaker() : new GsonClientMaker();
         CLIENT client = clientMaker.implement(clientType, connection);
-        ((Exporter)client).__exportMethods(in.availableMethods());
+        ((Exporter) client).__exportMethods(in.availableMethods());
         connection.data(CLIENT_KEY, client);
         server.onOpen(connection, client);
     }

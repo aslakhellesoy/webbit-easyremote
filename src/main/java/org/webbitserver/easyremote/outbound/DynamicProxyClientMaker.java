@@ -1,8 +1,10 @@
 package org.webbitserver.easyremote.outbound;
 
+import org.codehaus.jackson.JsonGenerationException;
 import org.webbitserver.WebSocketConnection;
 import org.webbitserver.easyremote.Remote;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -13,7 +15,7 @@ import java.util.Set;
  */
 public abstract class DynamicProxyClientMaker implements ClientMaker {
 
-    protected abstract String createMessage(String methodName, Object[] args);
+    protected abstract String createMessage(String methodName, Object[] args) throws IOException;
 
     @Override
     @SuppressWarnings({"unchecked"})

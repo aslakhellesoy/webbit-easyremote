@@ -1,7 +1,7 @@
 /**
  * Creates a new RPC WebSocket
  *
- * @param path
+ * @param ws - The underlying WebSocket.
  * @param target - A Javascript object that will receive function calls.
  * @param options - An object for configuring the instance:
  *
@@ -12,23 +12,19 @@
  *                     server invokes a function. The default will report the error back to the server,
  *                     using printStackTrace() from http://stacktracejs.org/ if available.
  */
-function WebbitSocket(path, target, options) {
+function WebbitSocket(ws, target, options) {
     var self = this;
 
     var opts = {
         serverClientFormat: 'json',
         exceptionHandler: function(e) {
-            var message = "\n";
-            if(typeof(e) == 'string') {
-                message += e + "\n\n";
-            }
-            if(e.message) message += "message:" + e.message + "\n\n";
-            if(e.type) message += "type:" + e.type + "\n\n";
-            if(e.stack) message += "stack:" + e.stack + "\n\n";
+            var errorLines;
             if(typeof(window.printStackTrace) == 'function') {
-                message += "stacktracejs.org:" + printStackTrace({e:e}).join("\n") + "\n\n";
+                errorLines = printStackTrace({e:e});
+            } else {
+                errorLines = [e.toString()];
             }
-            self.__reportClientException(message); // This function is dynamically defined upon connection
+            self.__reportClientException(errorLines); // This function is dynamically defined upon connection
         }
     };
     for (var opt in options) { opts[opt] = options[opt]; }
@@ -52,7 +48,9 @@ function WebbitSocket(path, target, options) {
                     args: Array.prototype.slice.call(arguments)
                 };
                 try {
-                    ws.send(JSON.stringify(outgoing));
+                    var json = JSON.stringify(outgoing);
+                    console.log(json);
+                    ws.send(json);
                 } catch (e) {
                     opts.exceptionHandler(e);
                 }
@@ -72,26 +70,24 @@ function WebbitSocket(path, target, options) {
                     opts.exceptionHandler(e);
                 }
             } else {
-                self.__badNumberOfArguments('Javascript Function ' + incomingAction, action.length, incomingArgs);
+                self.__badNumberOfArguments('JavaScript Function ' + incomingAction, action.length, incomingArgs);
             }
         } else {
-            self.__noSuchFunction('Javascript Function ' + incomingAction);
+            self.__noSuchFunction('JavaScript Function ' + incomingAction);
         }
     }
 
-    var ws = new WebSocket('ws://' + document.location.host + path + '?serverClientFormat=' + opts.serverClientFormat);
-
-    ws.onclose = function() {
+    ws.addEventListener('close', function() {
         target.onclose && target.onclose();
         self.onclose && self.onclose();
-    };
+    });
 
-    ws.onerror = function() {
+    ws.addEventListener('error', function() {
         target.onerror && target.onerror();
         self.onerror && self.onerror();
-    };
+    });
 
-    ws.onmessage = function(e) {
+    ws.addEventListener('message', function(e) {
         target.onmessage && target.onmessage(e);
         self.onmessage && self.onmessage(e);
         incomingInvocation(e.data, function(incomingAction, incomingArgs) {
@@ -105,5 +101,5 @@ function WebbitSocket(path, target, options) {
                 }
             }
         });
-    };
+    });
 }
