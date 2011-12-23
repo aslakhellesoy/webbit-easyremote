@@ -2,16 +2,14 @@ package org.webbitserver.easyremote.inbound;
 
 import org.junit.Test;
 import org.webbitserver.WebSocketConnection;
-import org.webbitserver.easyremote.ClientException;
 import org.webbitserver.stub.StubConnection;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.Writer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.webbitserver.easyremote.inbound.InboundDispatcher.newStackTraceElement;
+import static org.webbitserver.easyremote.inbound.JavaScriptException.newStackTraceElement;
 
 public class JsonInboundDispatcherTest {
     @Test
@@ -33,11 +31,11 @@ public class JsonInboundDispatcherTest {
         try {
             dispatcher.dispatch(connection, clientException, this);
             fail();
-        } catch (ClientException e) {
+        } catch (JavaScriptException e) {
             StringWriter trace = new StringWriter();
             e.printStackTrace(new PrintWriter(trace));
             String expected = "" +
-                    "org.webbitserver.easyremote.ClientException: The error message\n" +
+                    "org.webbitserver.easyremote.inbound.JavaScriptException: The error message\n" +
                     "\tat Object.stringify(native)\n" +
                     "\tat Object.say(http://aslak.us.drwholdings.com:9877/chatroom.js:50:22)\n" +
                     "\tat .invokeOnTarget(http://aslak.us.drwholdings.com:9877/webbit.easyremote.js:68:28)\n" +

@@ -18,13 +18,18 @@ function WebbitSocket(ws, target, options) {
     var opts = {
         serverClientFormat: 'json',
         exceptionHandler: function(e) {
-            var errorLines;
+            var message;
+            var trace;
             if(typeof(window.printStackTrace) == 'function') {
-                errorLines = printStackTrace({e:e});
+                message = e.toString();
+                trace = printStackTrace({e:e});
+                console.log(message);
+                console.log(trace);
             } else {
-                errorLines = [e.toString()];
+                message = [e.toString()];
+                trace = [];
             }
-            self.__reportClientException(errorLines); // This function is dynamically defined upon connection
+            self.__reportClientException(message, trace); // This function is dynamically defined upon connection
         }
     };
     for (var opt in options) { opts[opt] = options[opt]; }
@@ -48,9 +53,7 @@ function WebbitSocket(ws, target, options) {
                     args: Array.prototype.slice.call(arguments)
                 };
                 try {
-                    var json = JSON.stringify(outgoing);
-                    console.log(json);
-                    ws.send(json);
+                    ws.send(JSON.stringify(outgoing));
                 } catch (e) {
                     opts.exceptionHandler(e);
                 }
