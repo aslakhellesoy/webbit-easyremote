@@ -17,7 +17,7 @@ Start by creating a Java interface that represents the JavaScript functions you 
 
 The `@Remote` annotation will cause the interface to be implemented by a dynamic proxy that the server can use to talk to the browser.
 
-Now, implement the object you would like to invoke methods on from the browser Javascript:
+Now, implement the object you would like to invoke methods on from the browser JavaScript:
 
     public class ChatServer implements Server<ChatClient> {
       @Override
@@ -62,13 +62,14 @@ Finally hook it all up in Webbit:
 
 ## On the client
 
-Start by including the Javascript library (2k) in your HTML page:
+Start by including the JavaScript library (2k) in your HTML page:
 
     <script type="text/javascript" src="webbit.easyremote.js"></script>
 
 And hook up to the server:
 
-    var chatServer = new WebbitSocket('/chatsocket', {
+    var ws = new WebSocket(...);
+    var chatServer = new EasyRemote(ws, {
       onopen: function() {
       },
       onclose: function() {
@@ -113,6 +114,6 @@ That's it! See the [Chat Room](webbit-easyremote/tree/master/src/test/java/sampl
 If either side tries to invoke a method/function that doesn't exist on the other side, an error will be logged on the server.
 If a method/function is invoked with a different number of arguments than the other side accepts an error will also be logged on the server.
 
-If a function on the client called by the server raises an exception, that exception will be caught in the Javascript library and
+If a function on the client called by the server raises an exception, that exception will be caught in the JavaScript library and
 sent down to the server. You will get a better error message on the server if the client has loaded the [stacktrace.js](http://stacktracejs.org/) script.
 You can try this out with the chat example and typing the message "throw string" or "throw exception".

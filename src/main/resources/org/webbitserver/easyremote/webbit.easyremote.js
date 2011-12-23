@@ -1,8 +1,8 @@
 /**
- * Creates a new RPC WebSocket
+ * Wraps an EasyRemote around a WebSocket.
  *
  * @param ws - The underlying WebSocket.
- * @param target - A Javascript object that will receive function calls.
+ * @param target - A JavaScript object that will receive function calls on incoming messages.
  * @param options - An object for configuring the instance:
  *
  *   serverClientFormat: [csv|json] - How server->client invocations are formatted.
