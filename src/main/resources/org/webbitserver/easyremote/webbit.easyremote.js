@@ -12,7 +12,7 @@
  *                     server invokes a function. The default will report the error back to the server,
  *                     using printStackTrace() from http://stacktracejs.org/ if available.
  */
-function WebbitSocket(ws, target, options) {
+function EasyRemote(ws, target, options) {
     var self = this;
 
     var opts = {
@@ -23,8 +23,6 @@ function WebbitSocket(ws, target, options) {
             if(typeof(window.printStackTrace) == 'function') {
                 message = e.toString();
                 trace = printStackTrace({e:e});
-                console.log(message);
-                console.log(trace);
             } else {
                 message = [e.toString()];
                 trace = [];
@@ -76,7 +74,7 @@ function WebbitSocket(ws, target, options) {
                 self.__badNumberOfArguments('JavaScript Function ' + incomingAction, action.length, incomingArgs);
             }
         } else {
-            self.__noSuchFunction('JavaScript Function ' + incomingAction);
+            self.__noSuchRemoteMethod('JavaScript Function ' + incomingAction);
         }
     }
 

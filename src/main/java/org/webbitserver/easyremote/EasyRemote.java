@@ -25,12 +25,12 @@ public class EasyRemote<CLIENT> implements WebSocketHandler {
         this.server = server;
     }
 
-    public EasyRemote(Class<CLIENT> clientType, Server<CLIENT> server) {
-        this(clientType, server, new JsonClientMaker());
+    public static <T> WebSocketHandler easyRemote(Class<T> clientType, Server<T> server) {
+        return new EasyRemote<T>(clientType, server, new JsonClientMaker());
     }
 
-    public static <T> WebSocketHandler easyRemote(Class<T> clientType, Server<T> server) {
-        return new EasyRemote<T>(clientType, server);
+    public static <T> WebSocketHandler easyRemote(Class<T> clientType, Server<T> server, ClientMaker clientMaker) {
+        return new EasyRemote<T>(clientType, server, clientMaker);
     }
 
     @Override

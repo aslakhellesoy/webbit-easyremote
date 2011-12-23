@@ -31,7 +31,7 @@ function connect() {
     // connect to socket
     logText('* Connecting...');
     var ws = new WebSocket('ws://' + document.location.host + '/chatsocket');
-    chatServer = new WebbitSocket(ws, {
+    chatServer = new EasyRemote(ws, {
         onopen: function() {
             logText('* Connected!');
             login();
@@ -58,7 +58,7 @@ function connect() {
             logText("* User '" + username + "' left.");
         }
     }, {
-        serverClientFormat: window.location.hash.substring(1) // Use #csv to use CSV transport instead of JSON
+        serverClientFormat: 'csv'
     });
 
     // wire up text input event
